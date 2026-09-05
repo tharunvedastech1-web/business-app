@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'http://10.97.229.240:5000/api';
-
+const API_URL = 'http://10.106.171.240:5000/api';
 interface User {
   id: string;
   name: string;
@@ -36,7 +35,6 @@ export const login = createAsyncThunk(
         `${API_URL}/auth/login`,
         credentials
       );
-
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
