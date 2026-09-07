@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,8 +20,8 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [errorDismissed, setErrorDismissed] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -34,20 +36,25 @@ export default function LoginScreen() {
   const bannerDuration = 3500;
 
   useEffect(() => {
-    if (user) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => setShowSuccess(false), bannerDuration);
-      return () => clearTimeout(timer);
-    }
-  }, [user]);
+    if (!user || bannerDismissed) return;
+
+    const timer = setTimeout(() => {
+      setBannerDismissed(true);
+      router.replace('/(tabs)');
+    }, bannerDuration);
+
+    return () => clearTimeout(timer);
+  }, [user, bannerDismissed]);
 
   useEffect(() => {
-    if (error) {
-      setShowError(true);
-      const timer = setTimeout(() => setShowError(false), bannerDuration);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
+    if (!error || errorDismissed) return;
+
+    const timer = setTimeout(() => {
+      setErrorDismissed(true);
+    }, bannerDuration);
+
+    return () => clearTimeout(timer);
+  }, [error, errorDismissed]);
 
   const sizes = {
     screenPad: spacious ? 32 : 20,
@@ -60,6 +67,8 @@ export default function LoginScreen() {
   };
 
   const handleLogin = () => {
+    setErrorDismissed(false);
+    setBannerDismissed(false);
     dispatch(login({ phone, password }));
   };
 
@@ -74,7 +83,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {showSuccess && user && (
+        {user && !bannerDismissed && (
           <View style={styles.successBanner}>
             <View style={styles.successIcon}>
               <Text style={styles.successIconText}>✓</Text>
@@ -88,7 +97,7 @@ export default function LoginScreen() {
           </View>
         )}
 
-        {showError && error && (
+        {error && !errorDismissed && (
           <View style={styles.errorBanner}>
             <View style={styles.errorIcon}>
               <Text style={styles.errorIconText}>✕</Text>
@@ -184,7 +193,7 @@ export default function LoginScreen() {
 
           <TouchableOpacity>
             <Text style={styles.registerText}>
-              Don't have an account? Register
+              Don&apos;t have an account? Register
             </Text>
           </TouchableOpacity>
         </View>
